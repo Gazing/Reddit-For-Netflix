@@ -53,9 +53,4 @@ document.addEventListener("onPlayerLoaded", function (e) {
     });
 });
 
-document.addEventListener("onOpenDiscussion", function (e) {
-    $("#netflix-player").append("<div id='discussion-mount'>");
-
-
-});
 /* eslint-enable */

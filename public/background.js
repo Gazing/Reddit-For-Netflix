@@ -1,4 +1,4 @@
-var activeTabs = [];
+
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
     if(details.frameId === 0) {
 

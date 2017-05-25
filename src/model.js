@@ -17,5 +17,15 @@ document.addEventListener("onSearchReddit", function (query) {
 
    })
 });
+
+document.addEventListener("onOpenDiscussion", function (e) {
+    $.ajax({
+        url: e.detail.url.replace("reddit.com", "api.reddit.com").replace("www.", ""),
+        success: function (result) {
+            document.dispatchEvent(new CustomEvent("onRedditDiscussion", {detail: result}));
+        }
+    })
+});
+
 /* eslint-enable */
 module.exports = model;

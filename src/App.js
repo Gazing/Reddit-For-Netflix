@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './index.css';
+import DiscussionApp from "./DiscussionApp.js";
 
 /* eslint-disable */
 class App extends Component {
@@ -34,8 +35,8 @@ class App extends Component {
             this.getListings();
         }.bind(this));
 
-        this.props.oldLeft = $(".player-status")[0].getBoundingClientRect().right - 55;
-        this.props.oldOpacity = window.getComputedStyle($(".player-controls-wrapper")[0]).getPropertyValue("opacity");
+        this.oldLeft = $(".player-status")[0].getBoundingClientRect().right - 55;
+        this.oldOpacity = window.getComputedStyle($(".player-controls-wrapper")[0]).getPropertyValue("opacity");
 
 
         // TODO:
@@ -45,10 +46,10 @@ class App extends Component {
             var box = $(".player-status")[0];
             var wrapper = $(".player-controls-wrapper")[0];
             if (!box) {return;}
-            if (this.props.oldLeft !== box.getBoundingClientRect().right - 55 || this.props.oldOpacity !== window.getComputedStyle(wrapper).getPropertyValue("opacity")) {
+            if (this.oldLeft !== box.getBoundingClientRect().right - 55 || this.oldOpacity !== window.getComputedStyle(wrapper).getPropertyValue("opacity")) {
                 this.forceUpdate();
-                this.props.oldLeft = box.getBoundingClientRect().right - 55 < 0 ? this.props.oldLeft : box.getBoundingClientRect().right - 55;
-                this.props.oldOpacity = window.getComputedStyle(wrapper).getPropertyValue("opacity");
+                this.oldLeft = box.getBoundingClientRect().right - 55 < 0 ? this.oldLeft : box.getBoundingClientRect().right - 55;
+                this.oldOpacity = window.getComputedStyle(wrapper).getPropertyValue("opacity");
             }
         }.bind(this), 15);
 
@@ -89,7 +90,7 @@ class App extends Component {
         if (box) toggleHide = (box.getBoundingClientRect().right - 55 < 0) ? " hidden" : "";
         else toggleHide = "hidden";
         return <div>
-                <div id="r4n-box" className={"player-control-button reddit_results"+hidden} style={{left: (box) ? this.props.oldLeft - 300 : 0}}>
+                <div id="r4n-box" className={"player-control-button reddit_results"+hidden} style={{left: (box) ? this.oldLeft - 300 : 0}}>
                     <div className="result_title">Episode Discussions</div>
                     <ul className={"discussion-list"}>
                         {this.state.results.length == 0 ? <div className="discussion-list-item-detail">No discussion threads found</div> : ""}
@@ -102,7 +103,11 @@ class App extends Component {
                     lineHeight:  (box) ? window.getComputedStyle(box).getPropertyValue("line-height") : 0,
                     height: (box) ? window.getComputedStyle(box).getPropertyValue("height") : 0,
                     opacity: (wrapper) ? window.getComputedStyle(wrapper).getPropertyValue("opacity") : 0,
-                    display: (wrapper) ? window.getComputedStyle(wrapper).getPropertyValue("display") : "none"}} onClick={() => { this.setState({hidden: !this.state.hidden}) }}>Reddit</div>
+                    display: (wrapper) ? window.getComputedStyle(wrapper).getPropertyValue("display") : "none"}} onClick={() => { this.setState({hidden: !this.state.hidden}) }}>
+                    Reddit
+                </div>
+
+                <DiscussionApp />
             </div>
     }
 }
@@ -127,7 +132,7 @@ class DiscussionItem extends Component {
         return <div className="discussion-list-item-detail">
                     {this.props.item.richSnippet.metatags.ogDescription}
                     <div className="discussion-button-box">
-                        <div className="discussion-button" onClick={() => { document.dispatchEvent(new CustomEvent("onOpenDiscussion", {detail: {url: item.url}})) }}>Open Discussion</div>
+                        <div className="discussion-button" onClick={() => { document.dispatchEvent(new CustomEvent("onOpenDiscussion", {detail: {url: this.props.item.url}})) }}>Open Discussion</div>
                     </div>
                 </div>
     }

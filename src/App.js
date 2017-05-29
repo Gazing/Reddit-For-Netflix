@@ -80,7 +80,7 @@ class App extends Component {
 
         var box = $(".player-status")[0];
         var wrapper = $(".player-controls-wrapper")[0];
-        let left = box.getBoundingClientRect().right - 55;
+        let left = box ? box.getBoundingClientRect().right - 55 : 0;
         var toggleHide;
         if (box) toggleHide = (left < 0) ? " hidden" : "";
         else toggleHide = " hidden";

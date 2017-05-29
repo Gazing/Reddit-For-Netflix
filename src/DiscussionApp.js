@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import './index.css';
 
 /* eslint-disable */
@@ -7,7 +8,8 @@ class DiscussionApp extends Component {
         super();
         this.state = {
             data: [],
-            hidden: true
+            hidden: true,
+            style: null
         };
 
     }
@@ -15,15 +17,41 @@ class DiscussionApp extends Component {
     componentDidMount() {
         document.addEventListener("onRedditDiscussion", function (e) {
            this.setState({data: e.detail, hidden: false});
+           this.resizePlayer(false);
         }.bind(this));
 
         chrome.runtime.onMessage.addListener(
             function(request, sender, sendResponse) {
                 if (request.method === "onRouteChanged") {
                     this.setState({hidden: true});
+                    this.resizePlayer(true);
                 }
             }.bind(this)
         );
+
+        document.addEventListener("onPlayerChange", function (e) {
+            if (this.state.style) this.resizePlayer(false, true);
+
+        }.bind(this));
+    }
+
+    resizePlayer(hidden, replace=false) {
+        if (!hidden) {
+            if (this.state.style && !replace) return;
+            if (replace && this.state.style) this.state.style.remove();
+            var appWidth = ReactDOM.findDOMNode(this).clientWidth;
+            var playerWidth = $(window).width() - appWidth;
+            var controlWidth = playerWidth * 0.9;
+            var controlLeft = playerWidth * 0.05;
+
+            var playerStyle = $("<style>").text(`#netflix-player:not(.player-postplay) .player-video-wrapper { width: ${playerWidth}px !important; }.player-controls-wrapper { width: ${controlWidth}px !important; left: ${controlLeft}px !important}.player-progress-round { margin-left: -150px !important; }`);
+            playerStyle.appendTo("body");
+            this.setState({style: playerStyle[0]});
+
+        } else {
+            this.setState({style: this.state.style.remove()});
+        }
+
     }
 
     render() {
@@ -36,7 +64,7 @@ class DiscussionApp extends Component {
                     <div className="r-post">
                         <header className="post-header">
                             <div className="post-options">•••</div>
-                            <div className="close-discussion" onClick={() => { this.setState({hidden: true}) }}>X</div>
+                            <div className="close-discussion" onClick={() => { this.setState({hidden: true}); this.resizePlayer(true); }}>X</div>
                         </header>
 
                         <div className="r-discussion-wrapper">
@@ -44,7 +72,7 @@ class DiscussionApp extends Component {
                                 <div className="post-info">
 
                                     <div className="subreddit">{post.subreddit_name_prefixed}</div>
-                                    <div className="post-tag">{post.link_flair_text}</div>
+                                    <div className={"post-tag"+((post.link_flair_text) ? "" : " hidden")}>{post.link_flair_text}</div>
                                 </div>
                                 <a className="post-title" target="_blank" href={post.url}>{post.title}</a>
                                 <div className="info">

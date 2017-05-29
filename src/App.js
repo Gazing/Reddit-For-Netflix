@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './index.css';
 import DiscussionApp from "./DiscussionApp.js";
+import PlayerEmitter from "./Emitter.js";
 
 /* eslint-disable */
 class App extends Component {
@@ -9,22 +10,21 @@ class App extends Component {
         super();
         this.state = {
             results: [],
-            hidden: true
+            hidden: true,
+            left: -1
         };
 
     }
     
     componentDidMount() {
-        console.log(this.props.detail);
         this.getListings();
 
         document.addEventListener("onListings", function (e) {
             var filtered = [];
             e.detail.results.forEach(function (item) {
-                if (item.title.indexOf("discussion") === -1 && item.title.indexOf(this.props.detail.title) === -1) return;
                 if (!item.richSnippet.metatags.ogTitle) return;
+                if (item.richSnippet.metatags.ogTitle.indexOf("Discussion") === -1) return;
                 else filtered.push(item);
-                console.log(item);
             }.bind(this));
             e.detail.results = filtered;
             this.setState(e.detail);
@@ -35,23 +35,14 @@ class App extends Component {
             this.getListings();
         }.bind(this));
 
-        this.oldLeft = $(".player-status")[0].getBoundingClientRect().right - 55;
-        this.oldOpacity = window.getComputedStyle($(".player-controls-wrapper")[0]).getPropertyValue("opacity");
+        PlayerEmitter.beginWatch();
 
-
-        // TODO:
-        // Make this into a tick based event driven design to make it more compatible and scalable
-        setInterval(function () {
-
-            var box = $(".player-status")[0];
-            var wrapper = $(".player-controls-wrapper")[0];
-            if (!box) {return;}
-            if (this.oldLeft !== box.getBoundingClientRect().right - 55 || this.oldOpacity !== window.getComputedStyle(wrapper).getPropertyValue("opacity")) {
-                this.forceUpdate();
-                this.oldLeft = box.getBoundingClientRect().right - 55 < 0 ? this.oldLeft : box.getBoundingClientRect().right - 55;
-                this.oldOpacity = window.getComputedStyle(wrapper).getPropertyValue("opacity");
-            }
-        }.bind(this), 15);
+        document.addEventListener("onPlayerChange", function (e) {
+            let box = $(".player-status")[0];
+            let left = box.getBoundingClientRect().right - 55;
+            if (left < 0) this.forceUpdate();
+            else this.setState({left: left});
+        }.bind(this));
 
         chrome.runtime.onMessage.addListener(
             function(request, sender, sendResponse) {
@@ -70,15 +61,18 @@ class App extends Component {
     }
 
     getListings() {
-        if (this.props.detail.title.indexOf(":") != -1) {
-            this.props.detail.title = this.props.detail.title.substring(0, this.props.detail.title.indexOf(":"));
-        }
-        var episode = this.props.detail.episode.replace("Season ", "").replace("Ep. ", "").replace(":", "");
-        var ep = episode.split(" ")[1];
-        var season = episode.split(" ")[0];
-        if (ep.length == 1) ep = "0"+ep;
-        if (season.length == 1) season = "0"+season;
-        document.dispatchEvent(new CustomEvent("onSearchReddit", {detail: "\""+this.props.detail.show+"\" \"discussion\" \""+this.props.detail.title+"\" "+ep+" "+season}));
+        // if (this.props.detail.title.indexOf(":") !== -1) {
+        //     this.props.detail.title = this.props.detail.title.substring(0, this.props.detail.title.indexOf(":"));
+        // }
+        if (this.props.detail.isShow) {
+            var episode = this.props.detail.episode.replace("Season ", "").replace("Ep. ", "").replace(":", "");
+            var ep = episode.split(" ")[1];
+            var season = episode.split(" ")[0];
+            if (ep.length == 1) ep = "0" + ep;
+            if (season.length == 1) season = "0" + season;
+            document.dispatchEvent(new CustomEvent("onSearchReddit", {detail: "\""+this.props.detail.show+"\" \"discussion\" "+this.props.detail.title}));
+        } else document.dispatchEvent(new CustomEvent("onSearchReddit", {detail: "\""+this.props.detail.show+"\" \"discussion\" \""}));
+
     }
 
     render() {
@@ -86,11 +80,12 @@ class App extends Component {
 
         var box = $(".player-status")[0];
         var wrapper = $(".player-controls-wrapper")[0];
+        let left = box.getBoundingClientRect().right - 55;
         var toggleHide;
-        if (box) toggleHide = (box.getBoundingClientRect().right - 55 < 0) ? " hidden" : "";
-        else toggleHide = "hidden";
+        if (box) toggleHide = (left < 0) ? " hidden" : "";
+        else toggleHide = " hidden";
         return <div>
-                <div id="r4n-box" className={"player-control-button reddit_results"+hidden} style={{left: (box) ? this.oldLeft - 300 : 0}}>
+                <div id="r4n-box" className={"player-control-button reddit_results"+hidden} style={{left: (box) ? this.state.left - 300 : 0}}>
                     <div className="result_title">Episode Discussions</div>
                     <ul className={"discussion-list"}>
                         {this.state.results.length == 0 ? <div className="discussion-list-item-detail">No discussion threads found</div> : ""}
@@ -99,7 +94,7 @@ class App extends Component {
 
                 </div>
 
-                <div className={"reddit_toggle"+toggleHide} style={{left: (box) ? box.getBoundingClientRect().right - 55 : 0,
+                <div className={"reddit_toggle"+toggleHide} style={{left: (box) ? left : 0,
                     lineHeight:  (box) ? window.getComputedStyle(box).getPropertyValue("line-height") : 0,
                     height: (box) ? window.getComputedStyle(box).getPropertyValue("height") : 0,
                     opacity: (wrapper) ? window.getComputedStyle(wrapper).getPropertyValue("opacity") : 0,

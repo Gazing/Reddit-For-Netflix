@@ -255,7 +255,7 @@ a {
 
 }
 
-.post-info .subreddit::after {
+.post-info .post-tag::before {
     content: " • ";
     color: #fff;
 }

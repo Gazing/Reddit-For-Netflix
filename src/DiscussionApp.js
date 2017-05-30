@@ -49,6 +49,7 @@ class DiscussionApp extends Component {
             this.setState({style: playerStyle[0]});
 
         } else {
+            if (!this.state.style) return;
             this.setState({style: this.state.style.remove()});
         }
 

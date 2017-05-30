@@ -11,7 +11,6 @@ document.addEventListener("onSearchReddit", function (query) {
        success: function (result) {
            result = result.replace("google.search.Search.apiary1466(", "").replace("// API callback\n", "");
            result = JSON.parse(result.substring(0, result.length-2));
-           console.log(result);
            document.dispatchEvent(new CustomEvent("onListings", {detail: {results: result.results}}));
        }
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Reddit for Netflix",
-  "version": "0.1",
+  "version": "0.21",
   "content_scripts": [
     {
       "matches": [

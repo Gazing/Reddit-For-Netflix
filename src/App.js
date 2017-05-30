@@ -54,6 +54,7 @@ class App extends Component {
 
         document.addEventListener("click", function (e) {
             var list = $("#r4n-box")[0];
+            if (!list) return;
             if (!list.contains(e.target) && e.target != $(".reddit_toggle")[0]) {
                 this.setState({hidden: true});
             }

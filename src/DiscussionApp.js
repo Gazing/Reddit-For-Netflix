@@ -61,6 +61,8 @@ class DiscussionApp extends Component {
         var hidden = this.state.hidden ? " hidden" : "";
         var escapeEl = document.createElement('textarea');
         escapeEl.innerHTML = post.selftext_html;
+        var unescaped = escapeEl.textContent;
+        escapeEl.remove();
         return <div className={"r-discussion"+hidden}>
                     <div className="r-post">
                         <header className="post-header">
@@ -84,7 +86,7 @@ class DiscussionApp extends Component {
                                     </span>
                                 </div>
 
-                                <div className="post-content" dangerouslySetInnerHTML={{__html: escapeEl.textContent}}>
+                                <div className="post-content" dangerouslySetInnerHTML={{__html: unescaped}}>
 
                                 </div>
                             </div>
@@ -95,7 +97,7 @@ class DiscussionApp extends Component {
 
                             {this.state.data[1].data.children.map(function (item) {
                                 if (item.kind === "more") return;
-                                return <Comment data={item.data} key={item.data.id}/>;
+                                return <Comment data={item.data} url={post.url} key={item.data.id} first={true}/>;
                             })}
 
                         </div>
@@ -122,8 +124,12 @@ class Comment extends Component {
     render() {
         var escapeEl = document.createElement('textarea');
         escapeEl.innerHTML = this.props.data.body_html;
+        var unescaped = escapeEl.textContent;
+        escapeEl.remove();
+        var hideParent =  this.props.first ?  " hidden" : "";
         return <div className="r-comment">
             <div className="info">
+                <a className="parent" name={this.props.data.id}> </a>
                 <a href={"https://www.reddit.com/u/"+this.props.data.author} target="_blank" className="author">{this.props.data.author}</a>
                 <span className={this.props.data.author_flair_text ? "flair" : "hidden"}>{this.props.data.author_flair_text}</span>
                 <span className="score">{this.props.data.score+" points"}</span>
@@ -132,19 +138,19 @@ class Comment extends Component {
                 </span>
             </div>
 
-            <div className="comment-content" dangerouslySetInnerHTML={{__html: escapeEl.textContent}}>
+            <div className="comment-content" dangerouslySetInnerHTML={{__html: unescaped}}>
 
             </div>
             <div className="options">
-                <a className="permalink" href={"http://www.reddit.com/r/Yogscast/comments/6chxxt/extreme_catfishing_thailand_vlog_03/dhutprd"} target="_blank">permalink</a>
-                <a className="parentlink" href={"http://www.reddit.com/r/Yogscast/comments/6chxxt/extreme_catfishing_thailand_vlog_03/#6chxxt"} target="_blank">parent</a>
+                <a className="permalink" href={this.props.url+"#"+this.props.data.id} target="_blank">permalink</a>
+                <a className={"parentlink"+hideParent} href={"#"+this.props.data.parent_id.substring(3, this.props.data.parent_id.length)}>parent</a>
             </div>
 
             <div className="comment-reply">
                 {this.props.data.replies.data ? this.props.data.replies.data.children.map(function (item) {
                     if (item.kind === "more") return;
-                    return <Comment data={item.data} key={item.data.id}/>
-                }) : null}
+                    return <Comment data={item.data} key={item.data.id} url={this.props.url}/>
+                }.bind(this)) : null}
             </div>
 
 

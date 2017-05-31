@@ -8,8 +8,6 @@ import "./model.js";
 
 loadExt();
 
-
-
 function loadExt() {
 
     $(document).arrive(".player-status-main-title", function () {

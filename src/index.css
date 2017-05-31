@@ -314,3 +314,8 @@ a {
     overflow-x: hidden;
     max-height: calc(100vh - 31px);
 }
+
+.parent {
+    width: 0;
+    height: 0;
+}

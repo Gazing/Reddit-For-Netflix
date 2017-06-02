@@ -61,6 +61,10 @@ class App extends Component {
         }.bind(this));
     }
 
+    componentWillUnmount() {
+        PlayerEmitter.stopWatch();
+    }
+
     getListings() {
         // if (this.props.detail.title.indexOf(":") !== -1) {
         //     this.props.detail.title = this.props.detail.title.substring(0, this.props.detail.title.indexOf(":"));

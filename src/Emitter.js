@@ -4,9 +4,11 @@ let PlayerEmitter = {
     tickRate: 20,
     oldLeft: 0,
     oldOpacity: 0,
+    interval: null,
 
     beginWatch: function () {
-        setInterval(function () {
+        if (this.interval) return;
+        this.interval = setInterval(function () {
             let box = $(".player-status")[0];
                 let wrapper = $(".player-controls-wrapper")[0];
                 if (!box) {return;}
@@ -16,6 +18,12 @@ let PlayerEmitter = {
                     this.oldOpacity = window.getComputedStyle(wrapper).getPropertyValue("opacity");
                 }
         }, this.tickRate);
+    },
+
+    stopWatch: function () {
+        if (this.interval) {
+            this.interval = clearInterval(this.interval);
+        }
     }
 
 };

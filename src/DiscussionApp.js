@@ -22,7 +22,7 @@ class DiscussionApp extends Component {
 
         chrome.runtime.onMessage.addListener(
             function(request, sender, sendResponse) {
-                if (request.method === "onRouteChanged") {
+                if (request.method === "onRouteChanged" && window.location.href.indexOf("#") === -1) {
                     this.setState({hidden: true});
                     this.resizePlayer(true);
                 }
